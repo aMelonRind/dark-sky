@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "dark-sky",
+  "version": "${version}",
+  "name": "dark-sky",
+  "description": "This mod can make the sky dark.",
+  "authors": [
+    "MelonRind"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/darksky",
+    "sources": "https://github.com/aMelonRind/dark-sky",
+    "issues": "https://github.com/aMelonRind/dark-sky/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/dark-sky/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "modmenu": [
+      "com.melonrind.darksky.config.ModMenuApiImpl"
+    ]
+  },
+  "mixins": [
+    "dark-sky.mixins.json"
+  ],
+  "depends": {
+    "minecraft": ">=1.19.3"
+  }
+}

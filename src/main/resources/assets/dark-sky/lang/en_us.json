@@ -1,0 +1,11 @@
+{
+  "darkSky.config.title": "Dark Sky Config",
+
+  "darkSky.config.entry.enabled": "Enabled",
+  "darkSky.config.entry.skySatFactor": "Sky Saturation Factor",
+  "darkSky.config.entry.fogSatFactor": "Fog Saturation Factor",
+  "darkSky.config.entry.bgSatFactor": "Background Saturation Factor",
+  "darkSky.config.entry.skyBriFactor": "Sky Brightness Factor",
+  "darkSky.config.entry.fogBriFactor": "Fog Brightness Factor",
+  "darkSky.config.entry.bgBriFactor": "Background Brightness Factor"
+}

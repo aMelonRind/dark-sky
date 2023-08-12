@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.melonrind.darksky.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinBackgroundRenderer",
+    "MixinClientWorld",
+    "MixinRenderSystem",
+    "MixinWorldRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

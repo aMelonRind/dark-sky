@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "id": "dark-sky",
   "version": "${version}",
-  "name": "dark-sky",
+  "name": "Dark Sky",
   "description": "This mod can make the sky dark.",
   "authors": [
     "MelonRind"
   ],
   "contact": {
-    "homepage": "https://modrinth.com/mod/darksky",
+    "homepage": "https://modrinth.com/mod/dark-sky",
     "sources": "https://github.com/aMelonRind/dark-sky",
     "issues": "https://github.com/aMelonRind/dark-sky/issues"
   },

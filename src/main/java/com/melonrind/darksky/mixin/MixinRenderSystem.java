@@ -1,13 +1,12 @@
 package com.melonrind.darksky.mixin;
 
 import com.melonrind.darksky.ColorDimmer;
+import com.melonrind.darksky.config.Config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
-import static com.melonrind.darksky.DarkSky.config;
 
 @Mixin(RenderSystem.class)
 public abstract class MixinRenderSystem {
@@ -26,7 +25,7 @@ public abstract class MixinRenderSystem {
     @Overwrite(remap = false)
     public static float[] getShaderFogColor() {
         assertOnRenderThread();
-        return config.enabled ? ColorDimmer.dimFogColor(shaderFogColor) : shaderFogColor;
+        return Config.enabled_ ? ColorDimmer.dimFogColor(shaderFogColor) : shaderFogColor;
     }
 
 }

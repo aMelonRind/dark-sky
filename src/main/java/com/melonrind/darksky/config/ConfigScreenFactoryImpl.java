@@ -33,9 +33,14 @@ public class ConfigScreenFactoryImpl implements ConfigScreenFactory<Screen> {
         ConfigEntries entries = new ConfigEntries(builder.entryBuilder(), category);
 
         builder.setSavingRunnable(() -> {
-            config = entries.createConfig();
+            config = entries.createConfig().apply();
             config.write();
         });
+
+        // why tf this isn't a thing
+//        builder.setDiscardRunnable(() -> {
+//            config.apply();
+//        });
 
         return builder.build();
     }
@@ -50,7 +55,8 @@ public class ConfigScreenFactoryImpl implements ConfigScreenFactory<Screen> {
         private final ConfigEntryBuilder builder;
         private final ConfigCategory category;
         private final BooleanListEntry enabledField;
-        private final IntegerSliderEntry
+        private BooleanListEntry immediateModeField;
+        private IntegerSliderEntry
                 skySatFactorField, fogSatFactorField, bgSatFactorField,
                 skyBriFactorField, fogBriFactorField, bgBriFactorField;
 
@@ -61,18 +67,39 @@ public class ConfigScreenFactoryImpl implements ConfigScreenFactory<Screen> {
             enabledField = builder.startBooleanToggle(translateField("enabled"), config.enabled)
                     .setDefaultValue(DEFAULT.enabled)
                     .setErrorSupplier(v -> {
-                        config.enabled = v;
+                        if (immediateModeField != null && immediateModeField.getValue()) Config.enabled_ = v;
                         return Optional.empty();
                     })
                     .build();
             category.addEntry(enabledField);
 
-            skySatFactorField = createSliderField("skySatFactor", config.skySat, DEFAULT.skySat, v -> config.skySatFactor = (float) v / 100.0f);
-            fogSatFactorField = createSliderField("fogSatFactor", config.fogSat, DEFAULT.fogSat, v -> config.fogSatFactor = (float) v / 100.0f);
-            bgSatFactorField  = createSliderField("bgSatFactor",  config.bgSat,  DEFAULT.bgSat,  v -> config.bgSatFactor  = (float) v / 100.0f);
-            skyBriFactorField = createSliderField("skyBriFactor", config.skyBri, DEFAULT.skyBri, v -> config.skyBriFactor = (float) v / 100.0f);
-            fogBriFactorField = createSliderField("fogBriFactor", config.fogBri, DEFAULT.fogBri, v -> config.fogBriFactor = (float) v / 100.0f);
-            bgBriFactorField  = createSliderField("bgBriFactor",  config.bgBri,  DEFAULT.bgBri,  v -> config.bgBriFactor  = (float) v / 100.0f);
+            immediateModeField = builder.startBooleanToggle(translateField("immediateMode"), false)
+                    .setTooltip(
+                            translateField("immediateMode.tooltip1"),
+                            translateField("immediateMode.tooltip2")
+                    )
+                    .setErrorSupplier(v -> {
+                        if (v) {
+                            Config.enabled_ = enabledField.getValue();
+                            if (bgBriFactorField == null) return Optional.empty();
+                            Config.skySatFactor = (float) skySatFactorField.getValue() / 100.0f;
+                            Config.fogSatFactor = (float) fogSatFactorField.getValue() / 100.0f;
+                            Config.bgSatFactor  = (float) bgSatFactorField.getValue()  / 100.0f;
+                            Config.skyBriFactor = (float) skyBriFactorField.getValue() / 100.0f;
+                            Config.fogBriFactor = (float) fogBriFactorField.getValue() / 100.0f;
+                            Config.bgBriFactor  = (float) bgBriFactorField.getValue()  / 100.0f;
+                        } else config.apply();
+                        return Optional.empty();
+                    })
+                    .build();
+            category.addEntry(immediateModeField);
+
+            skySatFactorField = createSliderField("skySatFactor", config.skySat, DEFAULT.skySat, v -> Config.skySatFactor = (float) v / 100.0f);
+            fogSatFactorField = createSliderField("fogSatFactor", config.fogSat, DEFAULT.fogSat, v -> Config.fogSatFactor = (float) v / 100.0f);
+            bgSatFactorField  = createSliderField("bgSatFactor",  config.bgSat,  DEFAULT.bgSat,  v -> Config.bgSatFactor  = (float) v / 100.0f);
+            skyBriFactorField = createSliderField("skyBriFactor", config.skyBri, DEFAULT.skyBri, v -> Config.skyBriFactor = (float) v / 100.0f);
+            fogBriFactorField = createSliderField("fogBriFactor", config.fogBri, DEFAULT.fogBri, v -> Config.fogBriFactor = (float) v / 100.0f);
+            bgBriFactorField  = createSliderField("bgBriFactor",  config.bgBri,  DEFAULT.bgBri,  v -> Config.bgBriFactor  = (float) v / 100.0f);
         }
 
         @Contract(" -> new")
@@ -88,7 +115,7 @@ public class ConfigScreenFactoryImpl implements ConfigScreenFactory<Screen> {
             IntegerSliderEntry entry = builder.startIntSlider(translateField(id), value, -100, 200)
                     .setDefaultValue(defaultValue)
                     .setTextGetter(v -> {
-                        if (changeCallback != null) changeCallback.accept(v);
+                        if (immediateModeField.getValue() && changeCallback != null) changeCallback.accept(v);
                         if (v == 0) return TEXT_NONE;
                         return Text.of((v > 0 ? "+" : "") + v + "%");
                     })

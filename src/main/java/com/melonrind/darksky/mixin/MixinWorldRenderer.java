@@ -1,6 +1,7 @@
 package com.melonrind.darksky.mixin;
 
 import com.melonrind.darksky.ColorDimmer;
+import com.melonrind.darksky.config.Config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
@@ -12,14 +13,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.melonrind.darksky.DarkSky.config;
-
 @Mixin(WorldRenderer.class)
 public class MixinWorldRenderer {
 
     @Inject(method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"))
     public void mixinRenderSky(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable, CallbackInfo ci) {
-        if (!config.enabled) return;
+        if (!Config.enabled_) return;
         ColorDimmer.dimBackgroundColor(
                 MixinBackgroundRenderer.getRed(),
                 MixinBackgroundRenderer.getGreen(),

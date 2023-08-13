@@ -6,6 +6,6 @@ public class DarkSky {
 
     public static final String MOD_ID = "dark-sky";
 
-    public static Config config = Config.read();
+    public static Config config = Config.read().apply();
 
 }

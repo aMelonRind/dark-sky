@@ -10,6 +10,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,12 +23,13 @@ public class Config {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final File CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve(DarkSky.MOD_ID + ".json").toFile();
 
-    public boolean enabled;
+    public final boolean enabled;
+    public static boolean enabled_;
     public final int
             skySat, fogSat, bgSat,
             skyBri, fogBri, bgBri;
     // converted factors
-    public float
+    public static float
             skySatFactor, fogSatFactor, bgSatFactor,
             skyBriFactor, fogBriFactor, bgBriFactor;
 
@@ -35,7 +37,7 @@ public class Config {
             true,
             100, 100, 100,
             -60, -60, -60
-    );
+    ).apply();
 
     public Config(
             boolean enabled,
@@ -50,6 +52,10 @@ public class Config {
         this.skyBri = MathHelper.clamp(skyBri, -100, 200);
         this.fogBri = MathHelper.clamp(fogBri, -100, 200);
         this.bgBri  = MathHelper.clamp(bgBri,  -100, 200);
+    }
+
+    public Config apply() {
+        enabled_ = enabled;
 
         skySatFactor = (float) skySat / 100.0f;
         fogSatFactor = (float) fogSat / 100.0f;
@@ -57,12 +63,14 @@ public class Config {
         skyBriFactor = (float) skyBri / 100.0f;
         fogBriFactor = (float) fogBri / 100.0f;
         bgBriFactor  = (float) bgBri  / 100.0f;
+
+        return this;
     }
 
     public static Config read() {
         try (FileReader reader = new FileReader(CONFIG_FILE)) {
             JsonElement el = JsonParser.parseReader(reader);
-            if (!el.isJsonObject()) return DEFAULT;
+            if (!el.isJsonObject()) return DEFAULT.apply();
 
             JsonObject o = el.getAsJsonObject();
             return new Config(
@@ -84,7 +92,7 @@ public class Config {
         }
     }
 
-    private static boolean readBoolean(JsonObject o, String key, boolean fallback) {
+    private static boolean readBoolean(@NotNull JsonObject o, String key, boolean fallback) {
         JsonElement el = o.get(key);
         if (el == null) return fallback;
 
@@ -96,7 +104,7 @@ public class Config {
         }
     }
 
-    private static int readInt(JsonObject o, String key, int fallback) {
+    private static int readInt(@NotNull JsonObject o, String key, int fallback) {
         JsonElement el = o.get(key);
         if (el == null) return fallback;
 

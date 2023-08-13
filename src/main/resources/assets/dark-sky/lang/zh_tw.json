@@ -1,0 +1,14 @@
+{
+  "darkSky.config.title": "陰暗天空設定",
+
+  "darkSky.config.entry.enabled": "啟用",
+  "darkSky.config.entry.immediateMode": "即時模式",
+  "darkSky.config.entry.immediateMode.tooltip1": "啟用這個可以即時套用設定",
+  "darkSky.config.entry.immediateMode.tooltip2": "但如果在啟用狀態捨棄設定 由於技術上的困難 你需要再開啟這個設定介面才能恢復設定值",
+  "darkSky.config.entry.skySatFactor": "天空飽和度",
+  "darkSky.config.entry.fogSatFactor": "迷霧飽和度",
+  "darkSky.config.entry.bgSatFactor": "背景飽和度",
+  "darkSky.config.entry.skyBriFactor": "天空亮度",
+  "darkSky.config.entry.fogBriFactor": "迷霧亮度",
+  "darkSky.config.entry.bgBriFactor": "背景亮度"
+}

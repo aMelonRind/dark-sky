@@ -5,10 +5,10 @@
   "darkSky.config.entry.immediateMode": "Immediate Mode",
   "darkSky.config.entry.immediateMode.tooltip1": "Enabling this can immediately apply changes.",
   "darkSky.config.entry.immediateMode.tooltip2": "But if you discard changes with this enabled, due to technical difficulty, you'll need to reopen this config screen in order to undo changes.",
-  "darkSky.config.entry.skySatFactor": "Sky Saturation Factor",
-  "darkSky.config.entry.fogSatFactor": "Fog Saturation Factor",
-  "darkSky.config.entry.bgSatFactor": "Background Saturation Factor",
-  "darkSky.config.entry.skyBriFactor": "Sky Brightness Factor",
-  "darkSky.config.entry.fogBriFactor": "Fog Brightness Factor",
-  "darkSky.config.entry.bgBriFactor": "Background Brightness Factor"
+  "darkSky.config.entry.skySatFactor": "Sky Saturation",
+  "darkSky.config.entry.fogSatFactor": "Fog Saturation",
+  "darkSky.config.entry.bgSatFactor": "Background Saturation",
+  "darkSky.config.entry.skyBriFactor": "Sky Brightness",
+  "darkSky.config.entry.fogBriFactor": "Fog Brightness",
+  "darkSky.config.entry.bgBriFactor": "Background Brightness"
 }

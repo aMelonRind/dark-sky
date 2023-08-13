@@ -25,7 +25,7 @@ public abstract class MixinRenderSystem {
     @Overwrite(remap = false)
     public static float[] getShaderFogColor() {
         assertOnRenderThread();
-        return Config.enabled_ ? ColorDimmer.dimFogColor(shaderFogColor) : shaderFogColor;
+        return Config.enabled_ ? ColorDimmer.dimFogColor(shaderFogColor.clone()) : shaderFogColor;
     }
 
 }

@@ -24,6 +24,8 @@ public class ConfigScreenFactoryImpl implements ConfigScreenFactory<Screen> {
 
     @Override
     public Screen create(Screen parent) {
+        config.apply();
+
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .transparentBackground()

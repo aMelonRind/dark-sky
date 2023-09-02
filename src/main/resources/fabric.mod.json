@@ -16,6 +16,9 @@
   "icon": "assets/dark-sky/icon.png",
   "environment": "client",
   "entrypoints": {
+    "client": [
+      "com.melonrind.darksky.DarkSky"
+    ],
     "modmenu": [
       "com.melonrind.darksky.config.ModMenuApiImpl"
     ]

@@ -20,7 +20,7 @@ import java.io.IOException;
 
 public class Config {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(DarkSky.class);
     private static final File CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve(DarkSky.MOD_ID + ".json").toFile();
 
     public final boolean enabled;
@@ -55,14 +55,15 @@ public class Config {
     }
 
     public Config apply() {
-        enabled_ = enabled;
-
         skySatFactor = (float) skySat / 100.0f;
         fogSatFactor = (float) fogSat / 100.0f;
         bgSatFactor  = (float) bgSat  / 100.0f;
         skyBriFactor = (float) skyBri / 100.0f;
         fogBriFactor = (float) fogBri / 100.0f;
         bgBriFactor  = (float) bgBri  / 100.0f;
+
+        enabled_ = enabled;
+        LOGGER.info("[Dark Sky] applied config");
 
         return this;
     }

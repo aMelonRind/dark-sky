@@ -1,7 +1,7 @@
-package com.melonrind.darksky.mixin;
+package io.github.amelonrind.darksky.mixin;
 
-import com.melonrind.darksky.ColorDimmer;
-import com.melonrind.darksky.config.Config;
+import io.github.amelonrind.darksky.ColorDimmer;
+import io.github.amelonrind.darksky.config.Config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;

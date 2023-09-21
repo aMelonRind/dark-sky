@@ -1,6 +1,6 @@
-package com.melonrind.darksky;
+package io.github.amelonrind.darksky;
 
-import com.melonrind.darksky.config.Config;
+import io.github.amelonrind.darksky.config.Config;
 import net.fabricmc.api.ClientModInitializer;
 
 public class DarkSky implements ClientModInitializer {

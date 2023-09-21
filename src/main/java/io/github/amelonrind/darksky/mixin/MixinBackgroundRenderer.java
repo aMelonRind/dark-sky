@@ -1,4 +1,4 @@
-package com.melonrind.darksky.mixin;
+package io.github.amelonrind.darksky.mixin;
 
 import net.minecraft.client.render.BackgroundRenderer;
 import org.spongepowered.asm.mixin.Mixin;

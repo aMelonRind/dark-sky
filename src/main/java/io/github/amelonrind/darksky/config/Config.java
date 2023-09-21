@@ -1,11 +1,11 @@
-package com.melonrind.darksky.config;
+package io.github.amelonrind.darksky.config;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
-import com.melonrind.darksky.DarkSky;
+import io.github.amelonrind.darksky.DarkSky;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.math.MathHelper;
 import org.apache.logging.log4j.LogManager;

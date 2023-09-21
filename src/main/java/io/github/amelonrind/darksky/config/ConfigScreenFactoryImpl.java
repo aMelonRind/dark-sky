@@ -1,4 +1,4 @@
-package com.melonrind.darksky.config;
+package io.github.amelonrind.darksky.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.melonrind.darksky.DarkSky.config;
-import static com.melonrind.darksky.config.Config.DEFAULT;
+import static io.github.amelonrind.darksky.DarkSky.config;
+import static io.github.amelonrind.darksky.config.Config.DEFAULT;
 
 public class ConfigScreenFactoryImpl implements ConfigScreenFactory<Screen> {
 

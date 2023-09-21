@@ -1,4 +1,4 @@
-package com.melonrind.darksky.config;
+package io.github.amelonrind.darksky.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

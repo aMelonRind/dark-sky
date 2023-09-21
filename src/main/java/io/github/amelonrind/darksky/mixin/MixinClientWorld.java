@@ -1,7 +1,7 @@
-package com.melonrind.darksky.mixin;
+package io.github.amelonrind.darksky.mixin;
 
-import com.melonrind.darksky.ColorDimmer;
-import com.melonrind.darksky.config.Config;
+import io.github.amelonrind.darksky.ColorDimmer;
+import io.github.amelonrind.darksky.config.Config;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;

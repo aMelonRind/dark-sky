@@ -1,6 +1,6 @@
-package com.melonrind.darksky;
+package io.github.amelonrind.darksky;
 
-import com.melonrind.darksky.config.Config;
+import io.github.amelonrind.darksky.config.Config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;

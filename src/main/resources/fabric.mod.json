@@ -17,10 +17,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.melonrind.darksky.DarkSky"
+      "io.github.amelonrind.darksky.DarkSky"
     ],
     "modmenu": [
-      "com.melonrind.darksky.config.ModMenuApiImpl"
+      "io.github.amelonrind.darksky.config.ModMenuApiImpl"
     ]
   },
   "mixins": [

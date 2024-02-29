@@ -77,7 +77,7 @@ public class ColorDimmer {
         }
 
         float briMul = calculateMultiplier(max, briFactor, max);
-        consumer.accept(r * briMul, g * briMul, b * briMul);
+        consumer.accept(Math.max(0.001F, r * briMul), Math.max(0.001F, g * briMul), Math.max(0.001F, b * briMul));
     }
 
     private static float calculateMultiplier(float value, float factor, float impact) {

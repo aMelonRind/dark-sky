@@ -29,8 +29,8 @@ import static io.github.amelonrind.darksky.ColorDimmer.*;
 public class ModMenuApiImpl implements ModMenuApi {
     private static final Text TITLE = Text.translatable("darkSky.config.title");
     private static final Text TEXT_NONE = Text.of("None");
-    private static final OptionDescription skyImageDesc;
-    private static final OptionDescription fogImageDesc;
+    private static final CompletableFuture<Optional<ImageRenderer>> skyImage = new CompletableFuture<>();
+    private static final CompletableFuture<Optional<ImageRenderer>> fogImage = new CompletableFuture<>();
     private static final ColorPreview skyColorPreview = new ColorPreview();
     private static final ColorPreview fogColorPreview = new ColorPreview();
     private static final Config cfg4preview = new Config();
@@ -39,12 +39,8 @@ public class ModMenuApiImpl implements ModMenuApi {
     private static Config cfg = Config.get();
 
     static {
-        CompletableFuture<Optional<ImageRenderer>> image = new CompletableFuture<>();
-        image.complete(Optional.of(skyColorPreview));
-        skyImageDesc = OptionDescription.createBuilder().customImage(image).build();
-        image = new CompletableFuture<>();
-        image.complete(Optional.of(fogColorPreview));
-        fogImageDesc = OptionDescription.createBuilder().customImage(image).build();
+        skyImage.complete(Optional.of(skyColorPreview));
+        fogImage.complete(Optional.of(fogColorPreview));
     }
 
     @Contract(value = "_ -> new", pure = true)
@@ -61,11 +57,17 @@ public class ModMenuApiImpl implements ModMenuApi {
                     if (isSky) {
                         skyColorPreview.setColor(lastSky.r, lastSky.g, lastSky.b);
                         ColorDimmer.dimColor(lastSky.r, lastSky.g, lastSky.b, cfg4preview.skyBri / 100.0f, cfg4preview.skySat / 100.0f, skyColorPreview::setColor);
-                        return skyImageDesc;
+                        return OptionDescription.createBuilder()
+                                .text(formatColor(lastSky.getColor(), skyColorPreview.getColor()))
+                                .customImage(skyImage)
+                                .build();
                     } else {
                         fogColorPreview.setColor(lastBg.r, lastBg.g, lastBg.b);
                         ColorDimmer.dimColor(lastBg.r, lastBg.g, lastBg.b, cfg4preview.fogBri / 100.0f, cfg4preview.fogSat / 100.0f, fogColorPreview::setColor);
-                        return fogImageDesc;
+                        return OptionDescription.createBuilder()
+                                .text(formatColor(lastBg.getColor(), fogColorPreview.getColor()))
+                                .customImage(fogImage)
+                                .build();
                     }
                 })
                 .controller(option -> IntegerSliderControllerBuilder.create(option)
@@ -76,6 +78,11 @@ public class ModMenuApiImpl implements ModMenuApi {
                             return Text.of((v > 0 ? "+" : "") + v + "%");
                         }))
                 .build();
+    }
+
+    @Contract("_, _ -> new")
+    private static @NotNull Text formatColor(int from, int to) {
+        return Text.literal(String.format("#%06X -> #%06X", from, to));
     }
 
     @Override
@@ -119,6 +126,10 @@ public class ModMenuApiImpl implements ModMenuApi {
             this.b = (int) (b * 255);
         }
 
+        public int getColor() {
+            return (r << 16) + (g << 8) + b;
+        }
+
         @Override
         public int render(@NotNull DrawContext context, int x1, int y1, int renderWidth, float tickDelta) {
             MatrixStack matrices = context.getMatrices();
@@ -127,16 +138,14 @@ public class ModMenuApiImpl implements ModMenuApi {
             Tessellator tess = Tessellator.getInstance();
             BufferBuilder buf = tess.getBuffer();
 
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
+            RenderSystem.disableBlend();
             RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
             buf.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
             Matrix4f matrix = matrices.peek().getPositionMatrix();
 
             int x2 = x1 + renderWidth;
-            int h = renderWidth * 2;
-            int y2 = y1 + h;
+            int y2 = y1 + renderWidth;
 
             buf.vertex(matrix, x1, y2, 0).color(r, g, b, 255).next();
             buf.vertex(matrix, x2, y2, 0).color(r, g, b, 255).next();
@@ -144,10 +153,8 @@ public class ModMenuApiImpl implements ModMenuApi {
             buf.vertex(matrix, x2, y1, 0).color(r, g, b, 255).next();
             tess.draw();
 
-            RenderSystem.disableBlend();
-
             matrices.pop();
-            return h;
+            return renderWidth;
         }
 
         @Override

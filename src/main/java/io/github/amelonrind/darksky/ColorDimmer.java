@@ -113,6 +113,10 @@ public class ColorDimmer {
             this.b = b;
         }
 
+        public int getColor() {
+            return ((int) (r * 255.0f) << 16) + ((int) (g * 255.0f) << 8) + (int) (b * 255.0f);
+        }
+
     }
 
 }

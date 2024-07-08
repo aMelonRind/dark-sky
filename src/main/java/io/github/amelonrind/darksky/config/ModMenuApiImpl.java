@@ -136,22 +136,23 @@ public class ModMenuApiImpl implements ModMenuApi {
             matrices.push();
 
             Tessellator tess = Tessellator.getInstance();
-            BufferBuilder buf = tess.getBuffer();
+//            BufferBuilder buf = tess.getBuffer();
 
             RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
             RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 
-            buf.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+            BufferBuilder buf = tess.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
             Matrix4f matrix = matrices.peek().getPositionMatrix();
 
             int x2 = x1 + renderWidth;
             int y2 = y1 + renderWidth;
 
-            buf.vertex(matrix, x1, y2, 0).color(r, g, b, 255).next();
-            buf.vertex(matrix, x2, y2, 0).color(r, g, b, 255).next();
-            buf.vertex(matrix, x1, y1, 0).color(r, g, b, 255).next();
-            buf.vertex(matrix, x2, y1, 0).color(r, g, b, 255).next();
-            tess.draw();
+            buf.vertex(matrix, x1, y2, 0).color(r, g, b, 255);
+            buf.vertex(matrix, x2, y2, 0).color(r, g, b, 255);
+            buf.vertex(matrix, x1, y1, 0).color(r, g, b, 255);
+            buf.vertex(matrix, x2, y1, 0).color(r, g, b, 255);
+            BufferRenderer.drawWithGlobalProgram(buf.end());
 
             matrices.pop();
             return renderWidth;

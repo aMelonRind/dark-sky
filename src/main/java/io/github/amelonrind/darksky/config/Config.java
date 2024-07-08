@@ -14,7 +14,7 @@ import static io.github.amelonrind.darksky.DarkSky.LOGGER;
 
 public class Config {
     public static final ConfigClassHandler<Config> HANDLER = ConfigClassHandler.createBuilder(Config.class)
-            .id(new Identifier(DarkSky.MOD_ID, "main"))
+            .id(Identifier.of(DarkSky.MOD_ID, "main"))
             .serializer(config -> GsonConfigSerializerBuilder.create(config)
                     .setPath(FabricLoader.getInstance().getConfigDir().resolve(DarkSky.MOD_ID + ".json"))
                     .build())

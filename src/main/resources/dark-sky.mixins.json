@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "MixinBackgroundRenderer",
-    "MixinClientWorld",
-    "MixinRenderSystem"
+    "MixinClientWorld"
   ],
   "injectors": {
     "defaultRequire": 1

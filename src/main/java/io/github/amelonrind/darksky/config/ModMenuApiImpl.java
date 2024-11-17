@@ -3,14 +3,13 @@ package io.github.amelonrind.darksky.config;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import dev.isxander.yacl3.api.ConfigCategory;
-import dev.isxander.yacl3.api.Option;
-import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.YetAnotherConfigLib;
+import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
 import dev.isxander.yacl3.gui.image.ImageRenderer;
 import io.github.amelonrind.darksky.ColorDimmer;
+import net.minecraft.client.gl.ShaderProgram;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
@@ -27,7 +26,6 @@ import java.util.function.Function;
 import static io.github.amelonrind.darksky.ColorDimmer.*;
 
 public class ModMenuApiImpl implements ModMenuApi {
-    private static final Text TITLE = Text.translatable("darkSky.config.title");
     private static final Text TEXT_NONE = Text.of("None");
     private static final CompletableFuture<Optional<ImageRenderer>> skyImage = new CompletableFuture<>();
     private static final CompletableFuture<Optional<ImageRenderer>> fogImage = new CompletableFuture<>();
@@ -55,17 +53,23 @@ public class ModMenuApiImpl implements ModMenuApi {
                 .description(val -> {
                     setter.accept(cfg4preview, val);
                     if (isSky) {
-                        skyColorPreview.setColor(lastSky.r, lastSky.g, lastSky.b);
-                        ColorDimmer.dimColor(lastSky.r, lastSky.g, lastSky.b, cfg4preview.skyBri / 100.0f, cfg4preview.skySat / 100.0f, skyColorPreview::setColor);
+                        skyColorPreview.setColor(lastSky.getR(), lastSky.getG(), lastSky.getB());
+                        ColorDimmer.dimColor(lastSky.getR(), lastSky.getG(), lastSky.getB(),
+                                cfg4preview.skyBri / 100.0f, cfg4preview.skySat / 100.0f,
+                                skyColorPreview::setColor
+                        );
                         return OptionDescription.createBuilder()
                                 .text(formatColor(lastSky.getColor(), skyColorPreview.getColor()))
                                 .customImage(skyImage)
                                 .build();
                     } else {
-                        fogColorPreview.setColor(lastBg.r, lastBg.g, lastBg.b);
-                        ColorDimmer.dimColor(lastBg.r, lastBg.g, lastBg.b, cfg4preview.fogBri / 100.0f, cfg4preview.fogSat / 100.0f, fogColorPreview::setColor);
+                        fogColorPreview.setColor(lastFog.getR(), lastFog.getG(), lastFog.getB());
+                        ColorDimmer.dimColor(lastFog.getR(), lastFog.getG(), lastFog.getB(),
+                                cfg4preview.fogBri / 100.0f, cfg4preview.fogSat / 100.0f,
+                                fogColorPreview::setColor
+                        );
                         return OptionDescription.createBuilder()
-                                .text(formatColor(lastBg.getColor(), fogColorPreview.getColor()))
+                                .text(formatColor(lastFog.getColor(), fogColorPreview.getColor()))
                                 .customImage(fogImage)
                                 .build();
                     }
@@ -73,10 +77,7 @@ public class ModMenuApiImpl implements ModMenuApi {
                 .controller(option -> IntegerSliderControllerBuilder.create(option)
                         .range(-100, 200)
                         .step(1)
-                        .formatValue(v -> {
-                            if (v == 0) return TEXT_NONE;
-                            return Text.of((v > 0 ? "+" : "") + v + "%");
-                        }))
+                        .formatValue(v -> v == 0 ? TEXT_NONE : Text.of((v > 0 ? "+" : "") + v + "%")))
                 .build();
     }
 
@@ -89,10 +90,11 @@ public class ModMenuApiImpl implements ModMenuApi {
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return p -> {
             cfg = Config.get().write(cfg4preview);
+            Text title = Text.translatable("darkSky.config.title");
             return YetAnotherConfigLib.createBuilder()
-                    .title(TITLE)
+                    .title(title)
                     .category(ConfigCategory.createBuilder()
-                            .name(TITLE)
+                            .name(title)
                             .option(Option.<Boolean>createBuilder()
                                     .name(translate("enabled"))
                                     .binding(def.enabled, () -> cfg.enabled, val -> cfg.enabled = val)
@@ -106,9 +108,8 @@ public class ModMenuApiImpl implements ModMenuApi {
                     .save(() -> {
                         cfg.apply();
                         Config.HANDLER.save();
-                        lastBg.dirty = true;
-                        lastSky.dirty = true;
-                        lastFog.dirty = true;
+                        lastFog.markDirty();
+                        lastSky.markDirty();
                     })
                     .build()
                     .generateScreen(p);
@@ -132,29 +133,35 @@ public class ModMenuApiImpl implements ModMenuApi {
 
         @Override
         public int render(@NotNull DrawContext context, int x1, int y1, int renderWidth, float tickDelta) {
-            MatrixStack matrices = context.getMatrices();
-            matrices.push();
+            ShaderProgram origShader = RenderSystem.getShader();
+//            RenderSystem.setShader(GameRenderer::getPositionColorProgram); // pre 1.21.2
+            if (RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR) != null) {
+                MatrixStack matrices = context.getMatrices();
+                matrices.push();
 
-            Tessellator tess = Tessellator.getInstance();
-//            BufferBuilder buf = tess.getBuffer();
+                Tessellator tess = Tessellator.getInstance();
+//                BufferBuilder buf = tess.getBuffer();
 
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+                RenderSystem.disableBlend();
+                RenderSystem.defaultBlendFunc();
 
-            BufferBuilder buf = tess.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
-            Matrix4f matrix = matrices.peek().getPositionMatrix();
+                BufferBuilder buf = tess.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+                Matrix4f matrix = matrices.peek().getPositionMatrix();
 
-            int x2 = x1 + renderWidth;
-            int y2 = y1 + renderWidth;
+                int x2 = x1 + renderWidth;
+                int y2 = y1 + renderWidth;
 
-            buf.vertex(matrix, x1, y2, 0).color(r, g, b, 255);
-            buf.vertex(matrix, x2, y2, 0).color(r, g, b, 255);
-            buf.vertex(matrix, x1, y1, 0).color(r, g, b, 255);
-            buf.vertex(matrix, x2, y1, 0).color(r, g, b, 255);
-            BufferRenderer.drawWithGlobalProgram(buf.end());
+                buf.vertex(matrix, x1, y2, 0).color(r, g, b, 255);
+                buf.vertex(matrix, x2, y2, 0).color(r, g, b, 255);
+                buf.vertex(matrix, x1, y1, 0).color(r, g, b, 255);
+                buf.vertex(matrix, x2, y1, 0).color(r, g, b, 255);
+                BufferRenderer.drawWithGlobalProgram(buf.end());
 
-            matrices.pop();
+                matrices.pop();
+            }
+
+            RenderSystem.setShader(origShader);
+
             return renderWidth;
         }
 

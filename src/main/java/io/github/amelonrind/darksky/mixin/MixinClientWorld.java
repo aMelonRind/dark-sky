@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinClientWorld {
 
     @Inject(method = "getSkyColor", at = @At("TAIL"), cancellable = true)
-    public void mutateSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Vec3d> cir) {
+    public void mutateSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Integer> cir) {
         ColorDimmer.dimSkyColor(cir);
     }
 

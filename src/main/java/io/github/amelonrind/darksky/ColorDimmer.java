@@ -1,8 +1,8 @@
 package io.github.amelonrind.darksky;
 
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import org.jetbrains.annotations.NotNull;
+import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 public class ColorDimmer {
@@ -11,55 +11,35 @@ public class ColorDimmer {
     public static float skyBriFactor = -0.6f;
     public static float fogBriFactor = -0.6f;
 
-    public static final Color<Color<Void>> lastBg = new Color<>(new Color<>(null));
-    public static final Color<Vec3d> lastSky = new Color<>(new Vec3d(0, 0, 0));
-    public static final Color<float[]> lastFog = new Color<>(new float[]{0, 0, 0, 0});
+    public static final Color3f<Vector4f> lastFog = new Color3f<>(new Vector4f());
+    public static final Color1i lastSky = new Color1i();
 
-    public static void dimBackgroundColor(float red, float green, float blue, @NotNull ColorConsumer consumer) {
-        boolean equals = lastBg.checkEquality(red, green, blue);
+    public static void dimFogColor(CallbackInfoReturnable<Vector4f> cir) {
         if (!DarkSky.enabled) return;
-        if (equals) {
-            consumer.accept(lastBg.t.r, lastBg.t.g, lastBg.t.b);
+        Vector4f vec = cir.getReturnValue();
+        if (lastFog.checkEquality(vec.x, vec.y, vec.z) && lastFog.result.w == vec.w) {
+            cir.setReturnValue(lastFog.result);
             return;
         }
-        lastBg.t.setColor(red, green, blue);
-        dimColor(red, green, blue, fogBriFactor, fogSatFactor, (r, g, b) -> {
-            lastBg.t.setColor(r, g, b);
-            consumer.accept(r, g, b);
-        });
+        lastFog.result.set(vec.x, vec.y, vec.z);
+        lastFog.result.w = vec.w;
+        dimColor(vec.x, vec.y, vec.z, fogBriFactor, fogSatFactor,
+                (r, g, b) -> cir.setReturnValue(lastFog.result.set(r, g, b))
+        );
     }
 
-    public static void dimSkyColor(@NotNull CallbackInfoReturnable<Vec3d> cir) {
-        Vec3d vec = cir.getReturnValue();
-        boolean equals = lastSky.checkEquality((float) vec.x, (float) vec.y, (float) vec.z);
+    public static void dimSkyColor(CallbackInfoReturnable<Integer> cir) {
         if (!DarkSky.enabled) return;
-        if (equals) {
-            cir.setReturnValue(lastSky.t);
+        int color = cir.getReturnValueI();
+        if (lastSky.checkEquality(color)) {
+            cir.setReturnValue(lastSky.result);
             return;
         }
-        lastSky.t = vec;
-        dimColor(lastSky.r, lastSky.g, lastSky.b, skyBriFactor, skySatFactor, (r, g, b) -> {
-            lastSky.t = new Vec3d(r, g, b);
-            cir.setReturnValue(lastSky.t);
-        });
-    }
-
-    public static void dimFogColor(@NotNull CallbackInfoReturnable<float[]> cir) {
-        if (!DarkSky.enabled) return;
-        float[] color = cir.getReturnValue();
-        if (lastFog.checkEquality(color[0], color[1], color[2]) && lastFog.t[3] == color[3]) {
-            cir.setReturnValue(lastFog.t);
-            return;
-        }
-        lastFog.t[0] = color[0];
-        lastFog.t[1] = color[1];
-        lastFog.t[2] = color[2];
-        lastFog.t[3] = color[3];
-        dimColor(color[0], color[1], color[2], fogBriFactor, fogSatFactor, (r, g, b) -> {
-            lastFog.t[0] = r;
-            lastFog.t[1] = g;
-            lastFog.t[2] = b;
-            cir.setReturnValue(lastFog.t);
+        lastSky.result = color;
+        dimColor(lastSky.getR(), lastSky.getG(), lastSky.getB(), skyBriFactor, skySatFactor, (r, g, b) -> {
+            lastSky.setResult(r, g, b);
+            lastSky.result |= color & 0xFF000000;
+            cir.setReturnValue(lastSky.result);
         });
     }
 
@@ -77,7 +57,7 @@ public class ColorDimmer {
         }
 
         float briMul = calculateMultiplier(max, briFactor, max);
-        consumer.accept(Math.max(0.001F, r * briMul), Math.max(0.001F, g * briMul), Math.max(0.001F, b * briMul));
+        consumer.accept(Math.max(0.001f, r * briMul), Math.max(0.001f, g * briMul), Math.max(0.001f, b * briMul));
     }
 
     private static float calculateMultiplier(float value, float factor, float impact) {
@@ -89,20 +69,36 @@ public class ColorDimmer {
         void accept(float r, float g, float b);
     }
 
-    public static class Color<T> {
-        public boolean dirty = false;
-        public float r = 0.0f;
-        public float g = 0.0f;
-        public float b = 0.0f;
-        T t;
+    public static abstract class Color<T> {
+        T result;
 
-        Color(T t) {
-            this.t = t;
+        Color(T result) {
+            this.result = result;
+        }
+
+        public abstract void markDirty();
+
+        public abstract int getColor();
+
+        public abstract float getR();
+
+        public abstract float getG();
+
+        public abstract float getB();
+
+    }
+
+    public static class Color3f<T> extends Color<T> {
+        float r = 0.0f;
+        float g = 0.0f;
+        float b = 0.0f;
+
+        Color3f(T result) {
+            super(result);
         }
 
         boolean checkEquality(float r, float g, float b) {
-            if (dirty) dirty = false;
-            else if (this.r == r && this.g == g && this.b == b) return true;
+            if (this.r == r && this.g == g && this.b == b) return true;
             setColor(r, g, b);
             return false;
         }
@@ -113,8 +109,83 @@ public class ColorDimmer {
             this.b = b;
         }
 
+        @Override
+        public void markDirty() {
+            this.r = Float.NaN;
+        }
+
+        @Override
         public int getColor() {
             return ((int) (r * 255.0f) << 16) + ((int) (g * 255.0f) << 8) + (int) (b * 255.0f);
+        }
+
+        @Override
+        public float getR() {
+            return r;
+        }
+
+        @Override
+        public float getG() {
+            return g;
+        }
+
+        @Override
+        public float getB() {
+            return b;
+        }
+
+    }
+
+    public static class Color1i extends Color<Integer> {
+        boolean dirty = false;
+        int argb = 0;
+
+        Color1i() {
+            super(0);
+        }
+
+        boolean checkEquality(int argb) {
+            if (dirty) dirty = false;
+            else if (this.argb == argb) return true;
+            setColor(argb);
+            return false;
+        }
+
+        void setColor(int argb) {
+            this.argb = argb;
+        }
+
+        void setResult(float r, float g, float b) {
+            result = ColorHelper.getArgb(
+                    Math.max(1, ColorHelper.channelFromFloat(r)),
+                    Math.max(1, ColorHelper.channelFromFloat(g)),
+                    Math.max(1, ColorHelper.channelFromFloat(b))
+            );
+        }
+
+        @Override
+        public void markDirty() {
+            dirty = true;
+        }
+
+        @Override
+        public int getColor() {
+            return argb & 0xFFFFFF;
+        }
+
+        @Override
+        public float getR() {
+            return ColorHelper.floatFromChannel(ColorHelper.getRed(argb));
+        }
+
+        @Override
+        public float getG() {
+            return ColorHelper.floatFromChannel(ColorHelper.getGreen(argb));
+        }
+
+        @Override
+        public float getB() {
+            return ColorHelper.floatFromChannel(ColorHelper.getBlue(argb));
         }
 
     }
